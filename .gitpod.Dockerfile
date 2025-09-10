@@ -1,3 +1,6 @@
+ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
+
 FROM gitpod/workspace-full:latest
 
 # Install desktop + sound + flatpak
