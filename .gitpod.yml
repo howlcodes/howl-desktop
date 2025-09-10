@@ -1,0 +1,12 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - name: Setup Desktop
+    command: |
+      bash /workspace/setup-desktop.sh
+
+ports:
+  - port: 6901
+    onOpen: open-preview
+    name: KasmVNC
