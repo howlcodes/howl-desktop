@@ -1,23 +1,27 @@
 #!/usr/bin/env bash
 set -e
 
-# Start PulseAudio
+# Start PulseAudio for sound
 pulseaudio --start --exit-idle-time=-1 || true
 pactl load-module module-native-protocol-tcp auth-anonymous=1 || true
 
-# Start XFCE desktop inside KasmVNC
-if ! command -v vncserver >/dev/null; then
-  echo "Downloading KasmVNC..."
-  RELEASE_JSON=$(curl -s https://api.github.com/repos/kasmtech/KasmVNC/releases/latest)
-  KASM_DEB=$(echo "$RELEASE_JSON" | jq -r '.assets[]?.browser_download_url | select(endswith(".deb") and (contains("amd64"))) ' | head -n1)
-  wget -q -O /tmp/kasmvnc.deb "$KASM_DEB"
-  sudo dpkg -i /tmp/kasmvnc.deb || (sudo apt-get -f install -y && sudo dpkg -i /tmp/kasmvnc.deb)
-fi
+# Install TigerVNC + XFCE if missing
+sudo apt-get update
+sudo apt-get install -y tigervnc-standalone-server tigervnc-common xfce4 xfce4-goodies
 
-# Minimal xinitrc
-cat >~/.xinitrc <<'XINIT'
-exec startxfce4
-XINIT
+# Create VNC startup config if not present
+mkdir -p ~/.vnc
+cat >~/.vnc/xstartup <<'EOF'
+#!/bin/bash
+xrdb $HOME/.Xresources
+startxfce4 &
+EOF
+chmod +x ~/.vnc/xstartup
 
-# Start VNC
-vncserver -geometry 1280x800 -SecurityTypes None
+# Kill any existing VNC servers
+vncserver -kill :1 || true
+
+# Start VNC server on display :1 (will map to port 5901, web client uses 6901)
+vncserver :1 -geometry 1280x800 -SecurityTypes None
+
+echo "✅ TigerVNC started on port 5901 (Gitpod forwards to 6901)."
