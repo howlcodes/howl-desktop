@@ -25,3 +25,7 @@ vncserver -kill :1 || true
 vncserver :1 -geometry 1280x800 -SecurityTypes None
 
 echo "✅ TigerVNC started on port 5901 (Gitpod forwards to 6901)."
+
+# Start noVNC bridge
+websockify --web=/usr/share/novnc/ 6901 localhost:5901 &
+echo "✅ Desktop available at Gitpod Port 6901 (open in browser)."
